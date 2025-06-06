@@ -14,13 +14,12 @@ def save_db(data):
 def add_cors_headers(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    response.headers['Access-Control-Allow-Methods'] = 'POST,OPTIONS'
+    response.headers['Access-Control-Allow-Methods'] = 'POST,OPTIONS,GET'
     return response
 
 @comments_bp.route('/images/<int:image_id>/comments', methods=['POST', 'OPTIONS'])
 def add_comment_compatible(image_id):
     if request.method == 'OPTIONS':
-        # RESPONDE SIEMPRE 200 OK
         resp = make_response('')
         resp.status_code = 200
         return add_cors_headers(resp)
@@ -38,3 +37,21 @@ def add_comment_compatible(image_id):
             return add_cors_headers(resp), 201
     resp = jsonify({'error': 'Imagen no encontrada'})
     return add_cors_headers(resp), 404
+
+@comments_bp.route('/comments', methods=['GET', 'OPTIONS'])
+def get_all_comments():
+    if request.method == 'OPTIONS':
+        resp = make_response('')
+        resp.status_code = 200
+        return add_cors_headers(resp)
+    db = load_db()
+    comments = []
+    for img in db['images']:
+        for c in img.get('comments', []):
+            comments.append({
+                'image_id': img['id'],
+                'user_id': c['user_id'],
+                'text': c['text']
+            })
+    resp = jsonify(comments)
+    return add_cors_headers(resp)
