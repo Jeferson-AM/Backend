@@ -11,7 +11,7 @@ def get_db():
         db.row_factory = sqlite3.Row
     return db
 
-# Metodo para consultar si existe algo en la base de datos
+# Método para consultar si existe algo en la base de datos
 def query_db(query, args=(), one=False, commit=False):
     db = get_db()
     cur = db.execute(query, args)
@@ -30,6 +30,9 @@ def modify_db(query, args=()):
     return cur.lastrowid
 
 def close_connection(exception):
-    db = getattr(g, '_database', None)
+    db = g.pop('_database', None)
     if db is not None:
-        db.close()
+        try:
+            db.close()
+        except Exception:
+            pass
