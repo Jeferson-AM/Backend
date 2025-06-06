@@ -84,13 +84,14 @@ def get_users():
 @auth_bp.route('/profile/<int:user_id>', methods=["GET"])
 def get_profile(user_id):
     user = query_db(
-        'SELECT username, profile_photo FROM users WHERE id = ?',
+        'SELECT id, username, profile_photo FROM users WHERE id = ?',
         (user_id,), one=True
     )
     if not user:
         return jsonify({'error': 'Usuario no encontrado'}), 404
 
     return jsonify({
+        'id': user['id'],
         'username': user['username'],
         'photo': user['profile_photo']  # Esto es base64 o None
     }), 200
@@ -113,12 +114,13 @@ def update_profile_photo(user_id):
 
     # Devuelve los datos actualizados del usuario
     user = query_db(
-        'SELECT username, profile_photo FROM users WHERE id = ?',
+        'SELECT id, username, profile_photo FROM users WHERE id = ?',
         (user_id,), one=True
     )
     return jsonify({
         'success': True,
         'message': 'Foto de perfil actualizada',
+        'id': user['id'],
         'username': user['username'],
         'photo': user['profile_photo']
     }), 200
